@@ -8,7 +8,8 @@ const links = [
   { to: "/sports/baseball", label: "Baseball" },
   { to: "/sports/hockey", label: "Hockey" },
   { to: "/cart", label: "Cart" },
-  { to: "/profile", label: "Profile" }
+  { to: "/profile", label: "Profile" },
+  { to: "/history", label: "History" }
 ];
 
 export default function Navbar() {

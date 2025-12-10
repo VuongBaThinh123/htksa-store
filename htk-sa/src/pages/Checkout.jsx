@@ -4,7 +4,7 @@ import { processPayment } from '../utils/fakeApi.js'
 import { useCart } from '../context/CartContext.jsx'
 
 export default function Checkout(){
-  const { items, total, clear } = useCart()
+  const { items, total, clear, createOrder } = useCart()
   const navigate = useNavigate()
   const [card, setCard] = useState({ name:'', number:'', exp:'', cvv:'' })
   const [loading, setLoading] = useState(false)
@@ -17,10 +17,11 @@ export default function Checkout(){
     try{
       const res = await processPayment({ amount: total, card })
       setSuccess(res)
+      // create order in history before clearing cart
+      createOrder({ id: res.id, items, total: res.amount, createdAt: new Date().toISOString() })
       clear()
-      // navigate to a simple confirmation (or keep on page)
-      // show confirmation for a moment then go home
-      setTimeout(()=> navigate('/'), 2000)
+      // redirect to history so customer can leave feedback
+      setTimeout(()=> navigate('/history'), 1200)
     }catch(err){
       setError(err.message)
     }finally{ setLoading(false) }

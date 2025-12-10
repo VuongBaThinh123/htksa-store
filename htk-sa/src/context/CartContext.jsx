@@ -3,18 +3,26 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 const CartContext = createContext();
 const CART_KEY = "htksa_cart_v1";
+const ORDERS_KEY = "htksa_orders_v1";
 
 export function CartProvider({ children }) {
   const [items, setItems] = useState([]);
+  const [orders, setOrders] = useState([]);
 
   useEffect(() => {
     const saved = localStorage.getItem(CART_KEY);
     if (saved) setItems(JSON.parse(saved));
+    const savedOrders = localStorage.getItem(ORDERS_KEY);
+    if (savedOrders) setOrders(JSON.parse(savedOrders));
   }, []);
 
   useEffect(() => {
     localStorage.setItem(CART_KEY, JSON.stringify(items));
   }, [items]);
+
+  useEffect(() => {
+    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+  }, [orders]);
 
   const add = (product) => {
     setItems((prev) => {
@@ -38,8 +46,28 @@ export function CartProvider({ children }) {
     [items]
   );
 
+  // Orders / history
+  const createOrder = (order) => {
+    // order should include id, items, total, createdAt
+    const o = { ...order };
+    setOrders((prev) => [o, ...prev]);
+    return o;
+  };
+
+  const addFeedback = (orderId, itemId, feedback) => {
+    setOrders((prev) =>
+      prev.map((o) => {
+        if (o.id !== orderId) return o;
+        const items = o.items.map((it) =>
+          it.id === itemId ? { ...it, feedback } : it
+        );
+        return { ...o, items };
+      })
+    );
+  };
+
   return (
-    <CartContext.Provider value={{ items, add, remove, clear, setQty, total }}>
+    <CartContext.Provider value={{ items, add, remove, clear, setQty, total, orders, createOrder, addFeedback }}>
       {children}
     </CartContext.Provider>
   );

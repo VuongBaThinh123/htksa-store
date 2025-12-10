@@ -2,6 +2,8 @@ import { useParams, Link } from 'react-router-dom'
 import products from '../data/products.js'
 import ProductCard from '../components/ProductCard.jsx'
 import { useState, useEffect } from 'react'
+import { useCart } from '../context/CartContext.jsx'
+import { useToast } from '../context/ToastContext.jsx'
 
 export default function Product(){
   const { id } = useParams()
@@ -28,6 +30,22 @@ export default function Product(){
   const gallery = [product.image, product.image, product.image]
 
   const others = products.filter(p => p.id !== product.id && p.category === product.category).slice(0,4)
+
+  const { add, orders = [] } = useCart()
+  const { toast } = useToast()
+
+  // gather feedbacks for this product from orders
+  const feedbacks = orders
+    .flatMap((o) =>
+      (o.items || [])
+        .filter((it) => it.id === product.id && it.feedback)
+        .map((it) => ({
+          feedback: it.feedback,
+          orderId: o.id,
+          createdAt: o.createdAt,
+        }))
+    )
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
 
   return (
     <>
@@ -62,13 +80,29 @@ export default function Product(){
             <h1 style={{marginTop:18}}>{product.name}</h1>
             <p style={{color:'var(--muted)'}}>Brand: {product.brand} • Category: {product.category}</p>
             <p style={{marginTop:12}}>{product.description}</p>
+
+            <div style={{marginTop:18}}>
+              <h3>Customer feedback</h3>
+              {feedbacks.length === 0 ? (
+                <p style={{color:'var(--muted)'}}>No feedback yet for this product.</p>
+              ) : (
+                <div style={{display:'grid', gap:8}}>
+                  {feedbacks.map((f, idx) => (
+                    <div key={idx} className="card" style={{padding:12}}>
+                      <div style={{marginBottom:8}}>{f.feedback}</div>
+                      <div style={{fontSize:13, color:'var(--muted)'}}>Order #{f.orderId} • {new Date(f.createdAt).toLocaleString()}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <aside>
             <div className="card">
               <div style={{fontSize:20, fontWeight:800}}>${product.price.toFixed(2)}</div>
               <div style={{marginTop:12}}>
-                <button className="btn btn-primary">Add to Cart</button>
+                <button className="btn btn-primary" onClick={() => { add(product); toast('Added to cart') }}>Add to Cart</button>
               </div>
             </div>
 

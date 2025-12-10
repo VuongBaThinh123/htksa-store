@@ -12,6 +12,7 @@ import NotFound from './pages/NotFound.jsx'
 import Product from './pages/Product.jsx'
 import Checkout from './pages/Checkout.jsx'
 import Products from './pages/Products.jsx'
+import History from './pages/History.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 
 export default function App() {
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/products" element={<Products />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/history" element={<History />} />
           <Route path="/product/:id" element={<Product />} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
